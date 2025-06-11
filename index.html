@@ -14,7 +14,7 @@
       background: black;
       overflow: hidden;
     }
-    #slideshow, #videoContainer {
+    .layer {
       position: absolute;
       top: 0; left: 0;
       width: 100vw;
@@ -22,9 +22,18 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      transition: opacity 1s ease-in-out;
       background-color: black;
     }
-    #slideshow img {
+    #slideshow, #videoContainer {
+      opacity: 0;
+      z-index: 1;
+    }
+    #slideshow.visible, #videoContainer.visible {
+      opacity: 1;
+      z-index: 2;
+    }
+    #slide {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
@@ -37,12 +46,12 @@
   </style>
 </head>
 <body>
-  <div id="slideshow">
+  <div id="slideshow" class="layer visible">
     <img id="slide" src="signage1.png" alt="Signage">
   </div>
 
-  <div id="videoContainer" style="display: none;">
-    <video id="video" autoplay muted playsinline>
+  <div id="videoContainer" class="layer">
+    <video id="video" muted playsinline>
       <source src="signage-video.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
@@ -51,6 +60,7 @@
   <script>
     const images = ["signage1.png", "signage2.png", "signage3.png"];
     const imageDuration = 10000; // 10 seconds per image
+    const fadeDuration = 1000; // fade time in ms
     const videoDuration = 20000; // video length in ms (adjust as needed)
 
     let index = 0;
@@ -59,8 +69,18 @@
     const videoContainer = document.getElementById("videoContainer");
     const video = document.getElementById("video");
 
+    function fadeIn(element) {
+      element.classList.add("visible");
+    }
+
+    function fadeOut(element) {
+      element.classList.remove("visible");
+    }
+
     function showNextImage() {
       slide.src = images[index];
+      fadeIn(slideshow);
+      setTimeout(() => fadeOut(slideshow), imageDuration - fadeDuration);
       index = (index + 1) % images.length;
     }
 
@@ -71,7 +91,7 @@
         counter++;
         if (counter >= images.length) {
           clearInterval(interval);
-          startVideo();
+          setTimeout(startVideo, fadeDuration); // wait for fade-out
         } else {
           showNextImage();
         }
@@ -79,20 +99,21 @@
     }
 
     function startVideo() {
-      slideshow.style.display = "none";
-      videoContainer.style.display = "flex";
+      fadeIn(videoContainer);
       video.play();
       setTimeout(() => {
         video.pause();
         video.currentTime = 0;
-        videoContainer.style.display = "none";
-        slideshow.style.display = "flex";
-        startSlideshow();
+        fadeOut(videoContainer);
+        setTimeout(startSlideshow, fadeDuration); // restart after fade-out
       }, videoDuration);
     }
 
     // Start everything
-    window.onload = startSlideshow;
+    window.onload = () => {
+      fadeIn(slideshow);
+      startSlideshow();
+    };
   </script>
 </body>
 </html>
