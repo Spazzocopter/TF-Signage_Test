@@ -1,22 +1,98 @@
+<!DOCTYPE html>
 <html>
-  <head>
+<head>
+  <title>Digital Signage</title>
   <style>
-  body {
-    background-image: url('signage-test.png');
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-size: cover;
-  }
-  h1 {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 40px;
-  }
-  h2 {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 30px;
-  }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      width: 100%;
+      background: black;
+      overflow: hidden;
+    }
+    #slideshow, #videoContainer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: black;
+    }
+    #slideshow img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
   </style>
-  </head>
-  <body title="Digital Signage Demo">
-  </body>
+</head>
+<body>
+  <div id="slideshow">
+    <img id="slide" src="signage1.png" alt="Signage">
+  </div>
+
+  <div id="videoContainer" style="display: none;">
+    <video id="video" autoplay muted playsinline>
+      <source src="signage-video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <script>
+    const images = ["signage1.png", "signage2.png", "signage3.png"];
+    const imageDuration = 5000; // 5 seconds per image
+    const videoDuration = 10000; // video length in ms (adjust as needed)
+
+    let index = 0;
+    const slide = document.getElementById("slide");
+    const slideshow = document.getElementById("slideshow");
+    const videoContainer = document.getElementById("videoContainer");
+    const video = document.getElementById("video");
+
+    function showNextImage() {
+      slide.src = images[index];
+      index = (index + 1) % images.length;
+    }
+
+    function startSlideshow() {
+      let counter = 0;
+      showNextImage();
+      const interval = setInterval(() => {
+        counter++;
+        if (counter >= images.length) {
+          clearInterval(interval);
+          startVideo();
+        } else {
+          showNextImage();
+        }
+      }, imageDuration);
+    }
+
+    function startVideo() {
+      slideshow.style.display = "none";
+      videoContainer.style.display = "flex";
+      video.play();
+      setTimeout(() => {
+        video.pause();
+        video.currentTime = 0;
+        videoContainer.style.display = "none";
+        slideshow.style.display = "flex";
+        startSlideshow();
+      }, videoDuration);
+    }
+
+    // Start everything
+    window.onload = startSlideshow;
+  </script>
+</body>
 </html>
